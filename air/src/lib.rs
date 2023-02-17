@@ -4,9 +4,10 @@
 #[macro_use]
 extern crate alloc;
 
+use std::fmt::Write;
 use vm_core::{
     chiplets::hasher::Digest,
-    utils::{collections::Vec, ByteWriter, Serializable},
+    utils::{collections::Vec, ByteWriter, Deserializable, PushMany, Serializable},
     ExtensionOf, ProgramOutputs, CLK_COL_IDX, FMP_COL_IDX, ONE, STACK_TRACE_OFFSET, ZERO,
 };
 use winter_air::{
@@ -27,6 +28,7 @@ use utils::TransitionConstraintRange;
 pub use options::ProofOptions;
 pub use vm_core::{utils::ToElements, Felt, FieldElement, StarkField};
 pub use winter_air::{FieldExtension, HashFunction};
+use winter_crypto::{hashers::Blake2s_256, ElementHasher};
 
 // PROCESSOR AIR
 // ================================================================================================
@@ -239,11 +241,11 @@ impl Air for ProcessorAir {
 // PUBLIC INPUTS
 // ================================================================================================
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PublicInputs {
-    program_hash: Digest,
-    stack_inputs: Vec<Felt>,
-    outputs: ProgramOutputs,
+    pub program_hash: Digest,
+    pub stack_inputs: Vec<Felt>,
+    pub outputs: ProgramOutputs,
 }
 
 impl PublicInputs {
@@ -254,12 +256,12 @@ impl PublicInputs {
             outputs,
         }
     }
-}
 
-impl Serializable for PublicInputs {
-    fn write_into<W: ByteWriter>(&self, target: &mut W) {
-        target.write(self.program_hash.as_elements());
-        target.write(self.stack_inputs.as_slice());
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        result.write(self.program_hash);
+        result.write_u64(self.stack_inputs.len() as u64);
+        result.write(self.stack_inputs.clone());
 
         // write program outputs.
         let stack = self
@@ -268,7 +270,8 @@ impl Serializable for PublicInputs {
             .iter()
             .map(|v| Felt::new(*v))
             .collect::<Vec<_>>();
-        target.write(&stack);
+        result.write_u64(stack.len() as u64);
+        result.write(&stack);
 
         let overflow_addrs = self
             .outputs
@@ -276,6 +279,107 @@ impl Serializable for PublicInputs {
             .iter()
             .map(|v| Felt::new(*v))
             .collect::<Vec<_>>();
-        target.write(&overflow_addrs);
+        result.write_u64(overflow_addrs.len() as u64);
+        result.write(&overflow_addrs);
+        result
+    }
+}
+
+impl Serializable for PublicInputs {
+    fn write_into<W: ByteWriter>(&self, target: &mut W) {
+        let mut data: Vec<Felt> = Vec::new();
+
+        data.extend(self.program_hash.as_elements().iter());
+        data.extend(self.stack_inputs.as_slice().iter());
+
+        // // write program outputs.
+        let output_stack = self
+            .outputs
+            .stack()
+            .iter()
+            .map(|v| Felt::new(*v))
+            .collect::<Vec<_>>();
+        data.extend(output_stack.as_slice().iter());
+
+        let overflow_addrs = self
+            .outputs
+            .overflow_addrs()
+            .iter()
+            .map(|v| Felt::new(*v))
+            .collect::<Vec<_>>();
+        data.extend(overflow_addrs.as_slice().iter());
+
+        let hash = Blake2s_256::hash_elements(&data);
+
+        println!("seed: ");
+        for word in hash.clone().0.chunks(4) {
+            println!("0x{:x}", u32::from_le_bytes(word.try_into().unwrap()));
+        }
+
+        target.write(hash);
+    }
+}
+
+impl Deserializable for PublicInputs {
+    fn read_from<R: vm_core::utils::ByteReader>(
+        source: &mut R,
+    ) -> Result<Self, vm_core::utils::DeserializationError> {
+        let program_hash = Digest::read_from(source)?;
+        let stack_inputs_len = source.read_u64()?;
+        let stack_inputs = Felt::read_batch_from(source, stack_inputs_len as usize)?;
+
+        let stack_outputs_len = source.read_u64()?;
+        let stack_outputs = Felt::read_batch_from(source, stack_outputs_len as usize)?;
+        let stack_outputs_u64 = stack_outputs.iter().map(|i| i.as_int()).collect();
+
+        let overflow_addrs_len = source.read_u64()?;
+        let overflow_addrs = Felt::read_batch_from(source, overflow_addrs_len as usize)?;
+        let overflow_addrs_u64 = overflow_addrs.iter().map(|i| i.as_int()).collect();
+
+        Ok(PublicInputs::new(
+            program_hash,
+            stack_inputs,
+            ProgramOutputs {
+                stack: stack_outputs_u64,
+                overflow_addrs: overflow_addrs_u64,
+            },
+        ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use vm_core::{
+        chiplets::hasher::{self},
+        utils::{Deserializable, Serializable, SliceReader},
+        Felt, ProgramOutputs, StarkField,
+    };
+
+    use crate::PublicInputs;
+
+    #[test]
+    fn public_inputs_serde() {
+        let program_hash =
+            hasher::hash_elements(&[Felt::new(1), Felt::new(2), Felt::new(3), Felt::new(4)]);
+        let public_inputs = PublicInputs::new(
+            program_hash,
+            vec![Felt::new(0), Felt::new(1)],
+            ProgramOutputs {
+                stack: vec![],
+                overflow_addrs: vec![],
+            },
+        );
+
+        let mut buf = vec![];
+        public_inputs.write_into(&mut buf);
+        let deser = PublicInputs::read_from(&mut SliceReader::new(&buf[..])).unwrap();
+
+        assert_eq!(public_inputs.program_hash, deser.program_hash);
+        assert_eq!(public_inputs.stack_inputs, deser.stack_inputs);
+        assert_eq!(public_inputs.outputs.stack, deser.outputs.stack);
+        assert_eq!(
+            public_inputs.outputs.overflow_addrs,
+            deser.outputs.overflow_addrs
+        );
     }
 }

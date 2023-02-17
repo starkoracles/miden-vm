@@ -23,9 +23,9 @@ use winter_utils::collections::Vec;
 #[derive(Debug, Clone, Default)]
 pub struct ProgramOutputs {
     /// The elements on the stack at the end of execution.
-    stack: Vec<u64>,
+    pub stack: Vec<u64>,
     /// The overflow table row addresse required to reconstruct the final state of the table.
-    overflow_addrs: Vec<u64>,
+    pub overflow_addrs: Vec<u64>,
 }
 
 impl ProgramOutputs {

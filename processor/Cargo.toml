@@ -22,9 +22,9 @@ std = ["vm-core/std", "winterfell/std", "log/std"]
 [dependencies]
 log = "0.4.14"
 vm-core = { package = "miden-core", path = "../core", version = "0.3", default-features = false }
-winterfell = { package = "winter-prover", version = "0.4.2", default-features = false }
+winterfell = { package = "winter-prover", path = "../../winterfell/prover", default-features = false }
 
 [dev-dependencies]
 logtest = { version = "2.0", default-features = false  }
 miden-assembly = { package = "miden-assembly", path = "../assembly", version = "0.3", default-features = false }
-rand-utils = { package = "winter-rand-utils", version = "0.4.2" }
+rand-utils = { version = "0.4.0", path = "../../winterfell/utils/rand", package = "winter-rand-utils" }

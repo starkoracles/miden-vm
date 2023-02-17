@@ -55,7 +55,7 @@ stdlib = { package = "miden-stdlib", path = "../stdlib", version = "0.2", defaul
 structopt = { version = "0.3", default-features = false, optional = true }
 verifier = { package = "miden-verifier", path = "../verifier", version = "0.3", default-features = false }
 vm-core = { package = "miden-core", path = "../core", version = "0.3", default-features = false }
-winter-utils = { package = "winter-utils", version = "0.4.2", optional = true }
+winter-utils = { package = "winter-utils", version = "0.4.0", optional = true, path = "../../winterfell/utils/core" }
 
 [dev-dependencies]
 blake3 = "1.3"

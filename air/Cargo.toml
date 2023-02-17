@@ -29,9 +29,10 @@ std = ["vm-core/std", "winter-air/std"]
 
 [dependencies]
 vm-core = { package = "miden-core", path = "../core", version = "0.3", default-features = false }
-winter-air = { package = "winter-air", version = "0.4.2", default-features = false }
+winter-air = { package = "winter-air", version = "0.4.0", default-features = false, path = "../../winterfell/air" }
+winter-crypto = { version = "0.4.0", path = "../../winterfell/crypto" }
 
 [dev-dependencies]
 criterion = "0.4"
 proptest = "1.0"
-rand-utils = { package = "winter-rand-utils", version = "0.4.2" }
+rand-utils = { version = "0.4.0", path = "../../winterfell/utils/rand", package = "winter-rand-utils" }

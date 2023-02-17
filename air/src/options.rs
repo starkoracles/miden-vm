@@ -31,8 +31,8 @@ impl ProofOptions {
             27,
             8,
             16,
-            HashFunction::Blake3_192,
-            FieldExtension::Quadratic,
+            HashFunction::Blake2s_256,
+            FieldExtension::None,
             8,
             256,
         ))

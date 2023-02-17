@@ -1,6 +1,6 @@
 use super::{BTreeSet, CodeBlock, Felt, String, MODULE_PATH_DELIM};
 use core::{fmt, ops};
-use crypto::{hashers::Blake3_256, Digest, Hasher};
+use winter_crypto::{hashers::Blake3_256, Digest, Hasher};
 
 // PROCEDURE
 // ================================================================================================
