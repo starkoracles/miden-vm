@@ -4,7 +4,9 @@
 #[macro_use]
 extern crate alloc;
 
+#[cfg(feature = "std")]
 use std::fmt::Write;
+
 use vm_core::{
     chiplets::hasher::Digest,
     utils::{collections::Vec, ByteWriter, Deserializable, PushMany, Serializable},
@@ -311,9 +313,12 @@ impl Serializable for PublicInputs {
 
         let hash = Blake2s_256::hash_elements(&data);
 
-        println!("seed: ");
-        for word in hash.clone().0.chunks(4) {
-            println!("0x{:x}", u32::from_le_bytes(word.try_into().unwrap()));
+        #[cfg(feature = "std")]
+        {
+            println!("seed: ");
+            for word in hash.clone().0.chunks(4) {
+                println!("0x{:x}", u32::from_le_bytes(word.try_into().unwrap()));
+            }
         }
 
         target.write(hash);
