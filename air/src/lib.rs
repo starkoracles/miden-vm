@@ -36,6 +36,7 @@ use winter_crypto::{hashers::Blake2s_256, ElementHasher};
 // ================================================================================================
 
 /// TODO: add docs
+#[derive(Clone)]
 pub struct ProcessorAir {
     context: AirContext<Felt>,
     stack_inputs: Vec<Felt>,

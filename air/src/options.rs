@@ -3,7 +3,7 @@ use winter_air::{FieldExtension, HashFunction, ProofOptions as WinterProofOption
 
 /// TODO: add docs
 #[derive(Clone)]
-pub struct ProofOptions(WinterProofOptions);
+pub struct ProofOptions(pub WinterProofOptions);
 
 impl ProofOptions {
     pub fn new(
