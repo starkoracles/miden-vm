@@ -9,6 +9,7 @@ use crate::{
 
 /// Describes how to construct execution traces of auxiliary trace columns that depend on multiple
 /// chiplets in the Chiplets module (used in multiset checks).
+#[derive(Clone, Debug)]
 pub struct AuxTraceBuilder {
     pub(super) lookup_hints: Vec<(u32, ChipletsLookup)>,
     pub(super) request_rows: Vec<ChipletsLookupRow>,

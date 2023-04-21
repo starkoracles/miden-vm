@@ -8,6 +8,7 @@ use crate::Matrix;
 
 /// Describes how to construct execution traces of stack-related auxiliary trace segment columns
 /// (used in multiset checks).
+#[derive(Clone, Debug)]
 pub struct AuxTraceBuilder {
     /// A list of updates made to the overflow table during program execution. For each update we
     /// also track the cycle at which the update happened.

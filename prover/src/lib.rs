@@ -69,7 +69,7 @@ pub fn prove(
 // PROVER
 // ================================================================================================
 
-struct ExecutionProver {
+pub struct ExecutionProver {
     options: ProofOptions,
     stack_inputs: Vec<Felt>,
     outputs: ProgramOutputs,

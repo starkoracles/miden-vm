@@ -38,6 +38,7 @@ type RandomCoin = vm_core::utils::RandomCoin<Felt, vm_core::chiplets::hasher::Ha
 // VM EXECUTION TRACE
 // ================================================================================================
 
+#[derive(Clone, Debug)]
 pub struct AuxTraceHints {
     pub(crate) decoder: DecoderAuxTraceHints,
     pub(crate) stack: StackAuxTraceBuilder,
@@ -53,6 +54,7 @@ pub struct AuxTraceHints {
 ///   components.
 /// - Hints used during auxiliary trace segment construction.
 /// - Metadata needed by the STARK prover.
+#[derive(Clone, Debug)]
 pub struct ExecutionTrace {
     meta: Vec<u8>,
     layout: TraceLayout,

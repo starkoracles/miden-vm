@@ -254,7 +254,7 @@ impl OverflowTable {
 /// - The clock cycle at which the stack item was pushed into the overflow table.
 /// - The clock cycle of the value which was at the top of the overflow table when this value
 ///   was pushed onto it.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OverflowTableRow {
     val: Felt,
     clk: Felt,

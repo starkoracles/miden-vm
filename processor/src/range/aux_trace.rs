@@ -11,6 +11,7 @@ use crate::{
 
 /// Describes how to construct the execution trace of columns related to the range checker in the
 /// auxiliary segment of the trace. These are used in multiset checks.
+#[derive(Clone, Debug)]
 pub struct AuxTraceBuilder {
     // Range check lookups performed by all user operations, grouped and sorted by clock cycle. Each
     // cycle is mapped to a single CycleRangeChecks instance which includes lookups from the stack,
